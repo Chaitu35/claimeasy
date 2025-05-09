@@ -1,6 +1,13 @@
 package schema
 
-import "entgo.io/ent"
+import( "entgo.io/ent"
+"entgo.io/ent/schema/field"
+"entgo.io/ent/schema/edge"
+"time"
+
+"github.com/your/module/pkg/types"
+)
+
 
 // User holds the schema definition for the User entity.
 type User struct {
@@ -9,7 +16,9 @@ type User struct {
 
 // Fields of the User.
 func (User) Fields() []ent.Field {
-	return nil
+	return []ent.Fields{
+		field.Int("id").Positive().Immutable()
+	}
 }
 
 // Edges of the User.
