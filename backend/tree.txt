@@ -1,0 +1,97 @@
+Folder PATH listing for volume Data
+Volume serial number is 98D7-5E40
+D:\CLAIMEASY\BACKEND
+|   .env.dev
+|   go.mod
+|   go.sum
+|   tree.txt
+|   
++---cmd
+|       main.go
+|       
++---ent
+|   |   client.go
+|   |   ent.go
+|   |   mutation.go
+|   |   runtime.go
+|   |   tx.go
+|   |   user.go
+|   |   user_create.go
+|   |   user_delete.go
+|   |   user_query.go
+|   |   user_update.go
+|   |   
+|   +---enttest
+|   |       enttest.go
+|   |       
+|   +---hook
+|   |       hook.go
+|   |       
+|   +---migrate
+|   |       migrate.go
+|   |       schema.go
+|   |       
+|   +---predicate
+|   |       predicate.go
+|   |       
+|   +---runtime
+|   |       runtime.go
+|   |       
+|   +---schema
+|   |       clinics.go
+|   |       clinic_creds.go
+|   |       doctors.go
+|   |       permissions.go
+|   |       refresh_token.go
+|   |       user.go
+|   |       
+|   \---user
+|           user.go
+|           where.go
+|           
++---internal
+|   +---auth
+|   |   +---auth_test
+|   |   +---dto
+|   |   |       auth.go
+|   |   |       
+|   |   +---handler
+|   |   |       handler.go
+|   |   |       routes.go
+|   |   |       
+|   |   +---hasher
+|   |   |       bcrypt.go
+|   |   |       
+|   |   +---middleware
+|   |   +---repository
+|   |   |       repository.go
+|   |   |       
+|   |   \---services
+|   |           auth_service.go
+|   |           auth_services_interface.go
+|   |           
+|   +---config
+|   +---server
+|   |       server.go
+|   |       
+|   \---users
+|       \---repository
+|               user_ent_repository.go
+|               user_repository.go
+|               
++---pkg
+|   +---core
+|   |   |   regulatory.go
+|   |   |   
+|   |   \---role
+|   |           role.go
+|   |           
+|   +---db
+|   |       client.go
+|   |       
+|   \---jwtmanager
+|           jwtmanager.go
+|           
+\---utils
+        password.go
+        
