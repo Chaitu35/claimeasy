@@ -18,6 +18,8 @@ type Tx struct {
 	Clinics *ClinicsClient
 	// Doctors is the client for interacting with the Doctors builders.
 	Doctors *DoctorsClient
+	// PasswordResetToken is the client for interacting with the PasswordResetToken builders.
+	PasswordResetToken *PasswordResetTokenClient
 	// Permissions is the client for interacting with the Permissions builders.
 	Permissions *PermissionsClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
@@ -158,6 +160,7 @@ func (tx *Tx) init() {
 	tx.ClinicCreds = NewClinicCredsClient(tx.config)
 	tx.Clinics = NewClinicsClient(tx.config)
 	tx.Doctors = NewDoctorsClient(tx.config)
+	tx.PasswordResetToken = NewPasswordResetTokenClient(tx.config)
 	tx.Permissions = NewPermissionsClient(tx.config)
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)
 	tx.User = NewUserClient(tx.config)

@@ -70,16 +70,16 @@ func (pu *PermissionsUpdate) SetNillableCanCreate(b *bool) *PermissionsUpdate {
 	return pu
 }
 
-// SetCanUpdate sets the "can_update" field.
-func (pu *PermissionsUpdate) SetCanUpdate(b bool) *PermissionsUpdate {
-	pu.mutation.SetCanUpdate(b)
+// SetCanEdit sets the "can_edit" field.
+func (pu *PermissionsUpdate) SetCanEdit(b bool) *PermissionsUpdate {
+	pu.mutation.SetCanEdit(b)
 	return pu
 }
 
-// SetNillableCanUpdate sets the "can_update" field if the given value is not nil.
-func (pu *PermissionsUpdate) SetNillableCanUpdate(b *bool) *PermissionsUpdate {
+// SetNillableCanEdit sets the "can_edit" field if the given value is not nil.
+func (pu *PermissionsUpdate) SetNillableCanEdit(b *bool) *PermissionsUpdate {
 	if b != nil {
-		pu.SetCanUpdate(*b)
+		pu.SetCanEdit(*b)
 	}
 	return pu
 }
@@ -108,20 +108,6 @@ func (pu *PermissionsUpdate) SetCanExport(b bool) *PermissionsUpdate {
 func (pu *PermissionsUpdate) SetNillableCanExport(b *bool) *PermissionsUpdate {
 	if b != nil {
 		pu.SetCanExport(*b)
-	}
-	return pu
-}
-
-// SetCanImport sets the "can_import" field.
-func (pu *PermissionsUpdate) SetCanImport(b bool) *PermissionsUpdate {
-	pu.mutation.SetCanImport(b)
-	return pu
-}
-
-// SetNillableCanImport sets the "can_import" field if the given value is not nil.
-func (pu *PermissionsUpdate) SetNillableCanImport(b *bool) *PermissionsUpdate {
-	if b != nil {
-		pu.SetCanImport(*b)
 	}
 	return pu
 }
@@ -215,17 +201,14 @@ func (pu *PermissionsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := pu.mutation.CanCreate(); ok {
 		_spec.SetField(permissions.FieldCanCreate, field.TypeBool, value)
 	}
-	if value, ok := pu.mutation.CanUpdate(); ok {
-		_spec.SetField(permissions.FieldCanUpdate, field.TypeBool, value)
+	if value, ok := pu.mutation.CanEdit(); ok {
+		_spec.SetField(permissions.FieldCanEdit, field.TypeBool, value)
 	}
 	if value, ok := pu.mutation.CanDelete(); ok {
 		_spec.SetField(permissions.FieldCanDelete, field.TypeBool, value)
 	}
 	if value, ok := pu.mutation.CanExport(); ok {
 		_spec.SetField(permissions.FieldCanExport, field.TypeBool, value)
-	}
-	if value, ok := pu.mutation.CanImport(); ok {
-		_spec.SetField(permissions.FieldCanImport, field.TypeBool, value)
 	}
 	if value, ok := pu.mutation.CanPrint(); ok {
 		_spec.SetField(permissions.FieldCanPrint, field.TypeBool, value)
@@ -321,16 +304,16 @@ func (puo *PermissionsUpdateOne) SetNillableCanCreate(b *bool) *PermissionsUpdat
 	return puo
 }
 
-// SetCanUpdate sets the "can_update" field.
-func (puo *PermissionsUpdateOne) SetCanUpdate(b bool) *PermissionsUpdateOne {
-	puo.mutation.SetCanUpdate(b)
+// SetCanEdit sets the "can_edit" field.
+func (puo *PermissionsUpdateOne) SetCanEdit(b bool) *PermissionsUpdateOne {
+	puo.mutation.SetCanEdit(b)
 	return puo
 }
 
-// SetNillableCanUpdate sets the "can_update" field if the given value is not nil.
-func (puo *PermissionsUpdateOne) SetNillableCanUpdate(b *bool) *PermissionsUpdateOne {
+// SetNillableCanEdit sets the "can_edit" field if the given value is not nil.
+func (puo *PermissionsUpdateOne) SetNillableCanEdit(b *bool) *PermissionsUpdateOne {
 	if b != nil {
-		puo.SetCanUpdate(*b)
+		puo.SetCanEdit(*b)
 	}
 	return puo
 }
@@ -359,20 +342,6 @@ func (puo *PermissionsUpdateOne) SetCanExport(b bool) *PermissionsUpdateOne {
 func (puo *PermissionsUpdateOne) SetNillableCanExport(b *bool) *PermissionsUpdateOne {
 	if b != nil {
 		puo.SetCanExport(*b)
-	}
-	return puo
-}
-
-// SetCanImport sets the "can_import" field.
-func (puo *PermissionsUpdateOne) SetCanImport(b bool) *PermissionsUpdateOne {
-	puo.mutation.SetCanImport(b)
-	return puo
-}
-
-// SetNillableCanImport sets the "can_import" field if the given value is not nil.
-func (puo *PermissionsUpdateOne) SetNillableCanImport(b *bool) *PermissionsUpdateOne {
-	if b != nil {
-		puo.SetCanImport(*b)
 	}
 	return puo
 }
@@ -496,17 +465,14 @@ func (puo *PermissionsUpdateOne) sqlSave(ctx context.Context) (_node *Permission
 	if value, ok := puo.mutation.CanCreate(); ok {
 		_spec.SetField(permissions.FieldCanCreate, field.TypeBool, value)
 	}
-	if value, ok := puo.mutation.CanUpdate(); ok {
-		_spec.SetField(permissions.FieldCanUpdate, field.TypeBool, value)
+	if value, ok := puo.mutation.CanEdit(); ok {
+		_spec.SetField(permissions.FieldCanEdit, field.TypeBool, value)
 	}
 	if value, ok := puo.mutation.CanDelete(); ok {
 		_spec.SetField(permissions.FieldCanDelete, field.TypeBool, value)
 	}
 	if value, ok := puo.mutation.CanExport(); ok {
 		_spec.SetField(permissions.FieldCanExport, field.TypeBool, value)
-	}
-	if value, ok := puo.mutation.CanImport(); ok {
-		_spec.SetField(permissions.FieldCanImport, field.TypeBool, value)
 	}
 	if value, ok := puo.mutation.CanPrint(); ok {
 		_spec.SetField(permissions.FieldCanPrint, field.TypeBool, value)

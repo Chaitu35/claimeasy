@@ -68,16 +68,28 @@ var (
 			},
 		},
 	}
+	// PasswordResetTokensColumns holds the columns for the "password_reset_tokens" table.
+	PasswordResetTokensColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "token", Type: field.TypeString, Unique: true, Size: 100},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// PasswordResetTokensTable holds the schema information for the "password_reset_tokens" table.
+	PasswordResetTokensTable = &schema.Table{
+		Name:       "password_reset_tokens",
+		Columns:    PasswordResetTokensColumns,
+		PrimaryKey: []*schema.Column{PasswordResetTokensColumns[0]},
+	}
 	// PermissionsColumns holds the columns for the "permissions" table.
 	PermissionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "module", Type: field.TypeString},
 		{Name: "can_view", Type: field.TypeBool, Default: false},
 		{Name: "can_create", Type: field.TypeBool, Default: false},
-		{Name: "can_update", Type: field.TypeBool, Default: false},
+		{Name: "can_edit", Type: field.TypeBool, Default: false},
 		{Name: "can_delete", Type: field.TypeBool, Default: false},
 		{Name: "can_export", Type: field.TypeBool, Default: false},
-		{Name: "can_import", Type: field.TypeBool, Default: false},
 		{Name: "can_print", Type: field.TypeBool, Default: false},
 		{Name: "user_permissions", Type: field.TypeInt, Nullable: true},
 	}
@@ -89,7 +101,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "permissions_users_permissions",
-				Columns:    []*schema.Column{PermissionsColumns[9]},
+				Columns:    []*schema.Column{PermissionsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -135,14 +147,41 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// UserPasswordResetTokensColumns holds the columns for the "user_password_reset_tokens" table.
+	UserPasswordResetTokensColumns = []*schema.Column{
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "password_reset_token_id", Type: field.TypeInt},
+	}
+	// UserPasswordResetTokensTable holds the schema information for the "user_password_reset_tokens" table.
+	UserPasswordResetTokensTable = &schema.Table{
+		Name:       "user_password_reset_tokens",
+		Columns:    UserPasswordResetTokensColumns,
+		PrimaryKey: []*schema.Column{UserPasswordResetTokensColumns[0], UserPasswordResetTokensColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_password_reset_tokens_user_id",
+				Columns:    []*schema.Column{UserPasswordResetTokensColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "user_password_reset_tokens_password_reset_token_id",
+				Columns:    []*schema.Column{UserPasswordResetTokensColumns[1]},
+				RefColumns: []*schema.Column{PasswordResetTokensColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ClinicCredsTable,
 		ClinicsTable,
 		DoctorsTable,
+		PasswordResetTokensTable,
 		PermissionsTable,
 		RefreshTokensTable,
 		UsersTable,
+		UserPasswordResetTokensTable,
 	}
 )
 
@@ -150,4 +189,6 @@ func init() {
 	ClinicCredsTable.ForeignKeys[0].RefTable = ClinicsTable
 	DoctorsTable.ForeignKeys[0].RefTable = ClinicsTable
 	PermissionsTable.ForeignKeys[0].RefTable = UsersTable
+	UserPasswordResetTokensTable.ForeignKeys[0].RefTable = UsersTable
+	UserPasswordResetTokensTable.ForeignKeys[1].RefTable = PasswordResetTokensTable
 }

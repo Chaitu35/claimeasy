@@ -18,14 +18,12 @@ const (
 	FieldCanView = "can_view"
 	// FieldCanCreate holds the string denoting the can_create field in the database.
 	FieldCanCreate = "can_create"
-	// FieldCanUpdate holds the string denoting the can_update field in the database.
-	FieldCanUpdate = "can_update"
+	// FieldCanEdit holds the string denoting the can_edit field in the database.
+	FieldCanEdit = "can_edit"
 	// FieldCanDelete holds the string denoting the can_delete field in the database.
 	FieldCanDelete = "can_delete"
 	// FieldCanExport holds the string denoting the can_export field in the database.
 	FieldCanExport = "can_export"
-	// FieldCanImport holds the string denoting the can_import field in the database.
-	FieldCanImport = "can_import"
 	// FieldCanPrint holds the string denoting the can_print field in the database.
 	FieldCanPrint = "can_print"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -47,10 +45,9 @@ var Columns = []string{
 	FieldModule,
 	FieldCanView,
 	FieldCanCreate,
-	FieldCanUpdate,
+	FieldCanEdit,
 	FieldCanDelete,
 	FieldCanExport,
-	FieldCanImport,
 	FieldCanPrint,
 }
 
@@ -80,14 +77,12 @@ var (
 	DefaultCanView bool
 	// DefaultCanCreate holds the default value on creation for the "can_create" field.
 	DefaultCanCreate bool
-	// DefaultCanUpdate holds the default value on creation for the "can_update" field.
-	DefaultCanUpdate bool
+	// DefaultCanEdit holds the default value on creation for the "can_edit" field.
+	DefaultCanEdit bool
 	// DefaultCanDelete holds the default value on creation for the "can_delete" field.
 	DefaultCanDelete bool
 	// DefaultCanExport holds the default value on creation for the "can_export" field.
 	DefaultCanExport bool
-	// DefaultCanImport holds the default value on creation for the "can_import" field.
-	DefaultCanImport bool
 	// DefaultCanPrint holds the default value on creation for the "can_print" field.
 	DefaultCanPrint bool
 )
@@ -115,9 +110,9 @@ func ByCanCreate(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCanCreate, opts...).ToFunc()
 }
 
-// ByCanUpdate orders the results by the can_update field.
-func ByCanUpdate(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCanUpdate, opts...).ToFunc()
+// ByCanEdit orders the results by the can_edit field.
+func ByCanEdit(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCanEdit, opts...).ToFunc()
 }
 
 // ByCanDelete orders the results by the can_delete field.
@@ -128,11 +123,6 @@ func ByCanDelete(opts ...sql.OrderTermOption) OrderOption {
 // ByCanExport orders the results by the can_export field.
 func ByCanExport(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCanExport, opts...).ToFunc()
-}
-
-// ByCanImport orders the results by the can_import field.
-func ByCanImport(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCanImport, opts...).ToFunc()
 }
 
 // ByCanPrint orders the results by the can_print field.

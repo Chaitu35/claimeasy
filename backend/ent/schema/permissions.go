@@ -14,10 +14,9 @@ func (Permissions) Fields() []ent.Field {
         field.String("module"),
         field.Bool("can_view").Default(false),
         field.Bool("can_create").Default(false),
-        field.Bool("can_update").Default(false),  // Changed from "update"
+        field.Bool("can_edit").Default(false),  // Changed from "update"
         field.Bool("can_delete").Default(false),
         field.Bool("can_export").Default(false),
-        field.Bool("can_import").Default(false),
         field.Bool("can_print").Default(false),
     }
 }

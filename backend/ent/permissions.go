@@ -23,14 +23,12 @@ type Permissions struct {
 	CanView bool `json:"can_view,omitempty"`
 	// CanCreate holds the value of the "can_create" field.
 	CanCreate bool `json:"can_create,omitempty"`
-	// CanUpdate holds the value of the "can_update" field.
-	CanUpdate bool `json:"can_update,omitempty"`
+	// CanEdit holds the value of the "can_edit" field.
+	CanEdit bool `json:"can_edit,omitempty"`
 	// CanDelete holds the value of the "can_delete" field.
 	CanDelete bool `json:"can_delete,omitempty"`
 	// CanExport holds the value of the "can_export" field.
 	CanExport bool `json:"can_export,omitempty"`
-	// CanImport holds the value of the "can_import" field.
-	CanImport bool `json:"can_import,omitempty"`
 	// CanPrint holds the value of the "can_print" field.
 	CanPrint bool `json:"can_print,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -65,7 +63,7 @@ func (*Permissions) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case permissions.FieldCanView, permissions.FieldCanCreate, permissions.FieldCanUpdate, permissions.FieldCanDelete, permissions.FieldCanExport, permissions.FieldCanImport, permissions.FieldCanPrint:
+		case permissions.FieldCanView, permissions.FieldCanCreate, permissions.FieldCanEdit, permissions.FieldCanDelete, permissions.FieldCanExport, permissions.FieldCanPrint:
 			values[i] = new(sql.NullBool)
 		case permissions.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -112,11 +110,11 @@ func (pe *Permissions) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pe.CanCreate = value.Bool
 			}
-		case permissions.FieldCanUpdate:
+		case permissions.FieldCanEdit:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field can_update", values[i])
+				return fmt.Errorf("unexpected type %T for field can_edit", values[i])
 			} else if value.Valid {
-				pe.CanUpdate = value.Bool
+				pe.CanEdit = value.Bool
 			}
 		case permissions.FieldCanDelete:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -129,12 +127,6 @@ func (pe *Permissions) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field can_export", values[i])
 			} else if value.Valid {
 				pe.CanExport = value.Bool
-			}
-		case permissions.FieldCanImport:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field can_import", values[i])
-			} else if value.Valid {
-				pe.CanImport = value.Bool
 			}
 		case permissions.FieldCanPrint:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -199,17 +191,14 @@ func (pe *Permissions) String() string {
 	builder.WriteString("can_create=")
 	builder.WriteString(fmt.Sprintf("%v", pe.CanCreate))
 	builder.WriteString(", ")
-	builder.WriteString("can_update=")
-	builder.WriteString(fmt.Sprintf("%v", pe.CanUpdate))
+	builder.WriteString("can_edit=")
+	builder.WriteString(fmt.Sprintf("%v", pe.CanEdit))
 	builder.WriteString(", ")
 	builder.WriteString("can_delete=")
 	builder.WriteString(fmt.Sprintf("%v", pe.CanDelete))
 	builder.WriteString(", ")
 	builder.WriteString("can_export=")
 	builder.WriteString(fmt.Sprintf("%v", pe.CanExport))
-	builder.WriteString(", ")
-	builder.WriteString("can_import=")
-	builder.WriteString(fmt.Sprintf("%v", pe.CanImport))
 	builder.WriteString(", ")
 	builder.WriteString("can_print=")
 	builder.WriteString(fmt.Sprintf("%v", pe.CanPrint))

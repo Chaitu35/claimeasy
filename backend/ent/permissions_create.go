@@ -54,16 +54,16 @@ func (pc *PermissionsCreate) SetNillableCanCreate(b *bool) *PermissionsCreate {
 	return pc
 }
 
-// SetCanUpdate sets the "can_update" field.
-func (pc *PermissionsCreate) SetCanUpdate(b bool) *PermissionsCreate {
-	pc.mutation.SetCanUpdate(b)
+// SetCanEdit sets the "can_edit" field.
+func (pc *PermissionsCreate) SetCanEdit(b bool) *PermissionsCreate {
+	pc.mutation.SetCanEdit(b)
 	return pc
 }
 
-// SetNillableCanUpdate sets the "can_update" field if the given value is not nil.
-func (pc *PermissionsCreate) SetNillableCanUpdate(b *bool) *PermissionsCreate {
+// SetNillableCanEdit sets the "can_edit" field if the given value is not nil.
+func (pc *PermissionsCreate) SetNillableCanEdit(b *bool) *PermissionsCreate {
 	if b != nil {
-		pc.SetCanUpdate(*b)
+		pc.SetCanEdit(*b)
 	}
 	return pc
 }
@@ -92,20 +92,6 @@ func (pc *PermissionsCreate) SetCanExport(b bool) *PermissionsCreate {
 func (pc *PermissionsCreate) SetNillableCanExport(b *bool) *PermissionsCreate {
 	if b != nil {
 		pc.SetCanExport(*b)
-	}
-	return pc
-}
-
-// SetCanImport sets the "can_import" field.
-func (pc *PermissionsCreate) SetCanImport(b bool) *PermissionsCreate {
-	pc.mutation.SetCanImport(b)
-	return pc
-}
-
-// SetNillableCanImport sets the "can_import" field if the given value is not nil.
-func (pc *PermissionsCreate) SetNillableCanImport(b *bool) *PermissionsCreate {
-	if b != nil {
-		pc.SetCanImport(*b)
 	}
 	return pc
 }
@@ -186,9 +172,9 @@ func (pc *PermissionsCreate) defaults() {
 		v := permissions.DefaultCanCreate
 		pc.mutation.SetCanCreate(v)
 	}
-	if _, ok := pc.mutation.CanUpdate(); !ok {
-		v := permissions.DefaultCanUpdate
-		pc.mutation.SetCanUpdate(v)
+	if _, ok := pc.mutation.CanEdit(); !ok {
+		v := permissions.DefaultCanEdit
+		pc.mutation.SetCanEdit(v)
 	}
 	if _, ok := pc.mutation.CanDelete(); !ok {
 		v := permissions.DefaultCanDelete
@@ -197,10 +183,6 @@ func (pc *PermissionsCreate) defaults() {
 	if _, ok := pc.mutation.CanExport(); !ok {
 		v := permissions.DefaultCanExport
 		pc.mutation.SetCanExport(v)
-	}
-	if _, ok := pc.mutation.CanImport(); !ok {
-		v := permissions.DefaultCanImport
-		pc.mutation.SetCanImport(v)
 	}
 	if _, ok := pc.mutation.CanPrint(); !ok {
 		v := permissions.DefaultCanPrint
@@ -219,17 +201,14 @@ func (pc *PermissionsCreate) check() error {
 	if _, ok := pc.mutation.CanCreate(); !ok {
 		return &ValidationError{Name: "can_create", err: errors.New(`ent: missing required field "Permissions.can_create"`)}
 	}
-	if _, ok := pc.mutation.CanUpdate(); !ok {
-		return &ValidationError{Name: "can_update", err: errors.New(`ent: missing required field "Permissions.can_update"`)}
+	if _, ok := pc.mutation.CanEdit(); !ok {
+		return &ValidationError{Name: "can_edit", err: errors.New(`ent: missing required field "Permissions.can_edit"`)}
 	}
 	if _, ok := pc.mutation.CanDelete(); !ok {
 		return &ValidationError{Name: "can_delete", err: errors.New(`ent: missing required field "Permissions.can_delete"`)}
 	}
 	if _, ok := pc.mutation.CanExport(); !ok {
 		return &ValidationError{Name: "can_export", err: errors.New(`ent: missing required field "Permissions.can_export"`)}
-	}
-	if _, ok := pc.mutation.CanImport(); !ok {
-		return &ValidationError{Name: "can_import", err: errors.New(`ent: missing required field "Permissions.can_import"`)}
 	}
 	if _, ok := pc.mutation.CanPrint(); !ok {
 		return &ValidationError{Name: "can_print", err: errors.New(`ent: missing required field "Permissions.can_print"`)}
@@ -272,9 +251,9 @@ func (pc *PermissionsCreate) createSpec() (*Permissions, *sqlgraph.CreateSpec) {
 		_spec.SetField(permissions.FieldCanCreate, field.TypeBool, value)
 		_node.CanCreate = value
 	}
-	if value, ok := pc.mutation.CanUpdate(); ok {
-		_spec.SetField(permissions.FieldCanUpdate, field.TypeBool, value)
-		_node.CanUpdate = value
+	if value, ok := pc.mutation.CanEdit(); ok {
+		_spec.SetField(permissions.FieldCanEdit, field.TypeBool, value)
+		_node.CanEdit = value
 	}
 	if value, ok := pc.mutation.CanDelete(); ok {
 		_spec.SetField(permissions.FieldCanDelete, field.TypeBool, value)
@@ -283,10 +262,6 @@ func (pc *PermissionsCreate) createSpec() (*Permissions, *sqlgraph.CreateSpec) {
 	if value, ok := pc.mutation.CanExport(); ok {
 		_spec.SetField(permissions.FieldCanExport, field.TypeBool, value)
 		_node.CanExport = value
-	}
-	if value, ok := pc.mutation.CanImport(); ok {
-		_spec.SetField(permissions.FieldCanImport, field.TypeBool, value)
-		_node.CanImport = value
 	}
 	if value, ok := pc.mutation.CanPrint(); ok {
 		_spec.SetField(permissions.FieldCanPrint, field.TypeBool, value)

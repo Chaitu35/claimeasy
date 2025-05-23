@@ -18,6 +18,7 @@ import (
 	"github.com/Chaitu35/claimeasy/backend/ent/cliniccreds"
 	"github.com/Chaitu35/claimeasy/backend/ent/clinics"
 	"github.com/Chaitu35/claimeasy/backend/ent/doctors"
+	"github.com/Chaitu35/claimeasy/backend/ent/passwordresettoken"
 	"github.com/Chaitu35/claimeasy/backend/ent/permissions"
 	"github.com/Chaitu35/claimeasy/backend/ent/refreshtoken"
 	"github.com/Chaitu35/claimeasy/backend/ent/user"
@@ -34,6 +35,8 @@ type Client struct {
 	Clinics *ClinicsClient
 	// Doctors is the client for interacting with the Doctors builders.
 	Doctors *DoctorsClient
+	// PasswordResetToken is the client for interacting with the PasswordResetToken builders.
+	PasswordResetToken *PasswordResetTokenClient
 	// Permissions is the client for interacting with the Permissions builders.
 	Permissions *PermissionsClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
@@ -54,6 +57,7 @@ func (c *Client) init() {
 	c.ClinicCreds = NewClinicCredsClient(c.config)
 	c.Clinics = NewClinicsClient(c.config)
 	c.Doctors = NewDoctorsClient(c.config)
+	c.PasswordResetToken = NewPasswordResetTokenClient(c.config)
 	c.Permissions = NewPermissionsClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -147,14 +151,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		ClinicCreds:  NewClinicCredsClient(cfg),
-		Clinics:      NewClinicsClient(cfg),
-		Doctors:      NewDoctorsClient(cfg),
-		Permissions:  NewPermissionsClient(cfg),
-		RefreshToken: NewRefreshTokenClient(cfg),
-		User:         NewUserClient(cfg),
+		ctx:                ctx,
+		config:             cfg,
+		ClinicCreds:        NewClinicCredsClient(cfg),
+		Clinics:            NewClinicsClient(cfg),
+		Doctors:            NewDoctorsClient(cfg),
+		PasswordResetToken: NewPasswordResetTokenClient(cfg),
+		Permissions:        NewPermissionsClient(cfg),
+		RefreshToken:       NewRefreshTokenClient(cfg),
+		User:               NewUserClient(cfg),
 	}, nil
 }
 
@@ -172,14 +177,15 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		ClinicCreds:  NewClinicCredsClient(cfg),
-		Clinics:      NewClinicsClient(cfg),
-		Doctors:      NewDoctorsClient(cfg),
-		Permissions:  NewPermissionsClient(cfg),
-		RefreshToken: NewRefreshTokenClient(cfg),
-		User:         NewUserClient(cfg),
+		ctx:                ctx,
+		config:             cfg,
+		ClinicCreds:        NewClinicCredsClient(cfg),
+		Clinics:            NewClinicsClient(cfg),
+		Doctors:            NewDoctorsClient(cfg),
+		PasswordResetToken: NewPasswordResetTokenClient(cfg),
+		Permissions:        NewPermissionsClient(cfg),
+		RefreshToken:       NewRefreshTokenClient(cfg),
+		User:               NewUserClient(cfg),
 	}, nil
 }
 
@@ -209,7 +215,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.ClinicCreds, c.Clinics, c.Doctors, c.Permissions, c.RefreshToken, c.User,
+		c.ClinicCreds, c.Clinics, c.Doctors, c.PasswordResetToken, c.Permissions,
+		c.RefreshToken, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -219,7 +226,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.ClinicCreds, c.Clinics, c.Doctors, c.Permissions, c.RefreshToken, c.User,
+		c.ClinicCreds, c.Clinics, c.Doctors, c.PasswordResetToken, c.Permissions,
+		c.RefreshToken, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -234,6 +242,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Clinics.mutate(ctx, m)
 	case *DoctorsMutation:
 		return c.Doctors.mutate(ctx, m)
+	case *PasswordResetTokenMutation:
+		return c.PasswordResetToken.mutate(ctx, m)
 	case *PermissionsMutation:
 		return c.Permissions.mutate(ctx, m)
 	case *RefreshTokenMutation:
@@ -708,6 +718,155 @@ func (c *DoctorsClient) mutate(ctx context.Context, m *DoctorsMutation) (Value, 
 	}
 }
 
+// PasswordResetTokenClient is a client for the PasswordResetToken schema.
+type PasswordResetTokenClient struct {
+	config
+}
+
+// NewPasswordResetTokenClient returns a client for the PasswordResetToken from the given config.
+func NewPasswordResetTokenClient(c config) *PasswordResetTokenClient {
+	return &PasswordResetTokenClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `passwordresettoken.Hooks(f(g(h())))`.
+func (c *PasswordResetTokenClient) Use(hooks ...Hook) {
+	c.hooks.PasswordResetToken = append(c.hooks.PasswordResetToken, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `passwordresettoken.Intercept(f(g(h())))`.
+func (c *PasswordResetTokenClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PasswordResetToken = append(c.inters.PasswordResetToken, interceptors...)
+}
+
+// Create returns a builder for creating a PasswordResetToken entity.
+func (c *PasswordResetTokenClient) Create() *PasswordResetTokenCreate {
+	mutation := newPasswordResetTokenMutation(c.config, OpCreate)
+	return &PasswordResetTokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PasswordResetToken entities.
+func (c *PasswordResetTokenClient) CreateBulk(builders ...*PasswordResetTokenCreate) *PasswordResetTokenCreateBulk {
+	return &PasswordResetTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PasswordResetTokenClient) MapCreateBulk(slice any, setFunc func(*PasswordResetTokenCreate, int)) *PasswordResetTokenCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PasswordResetTokenCreateBulk{err: fmt.Errorf("calling to PasswordResetTokenClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PasswordResetTokenCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PasswordResetTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PasswordResetToken.
+func (c *PasswordResetTokenClient) Update() *PasswordResetTokenUpdate {
+	mutation := newPasswordResetTokenMutation(c.config, OpUpdate)
+	return &PasswordResetTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PasswordResetTokenClient) UpdateOne(prt *PasswordResetToken) *PasswordResetTokenUpdateOne {
+	mutation := newPasswordResetTokenMutation(c.config, OpUpdateOne, withPasswordResetToken(prt))
+	return &PasswordResetTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PasswordResetTokenClient) UpdateOneID(id int) *PasswordResetTokenUpdateOne {
+	mutation := newPasswordResetTokenMutation(c.config, OpUpdateOne, withPasswordResetTokenID(id))
+	return &PasswordResetTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PasswordResetToken.
+func (c *PasswordResetTokenClient) Delete() *PasswordResetTokenDelete {
+	mutation := newPasswordResetTokenMutation(c.config, OpDelete)
+	return &PasswordResetTokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PasswordResetTokenClient) DeleteOne(prt *PasswordResetToken) *PasswordResetTokenDeleteOne {
+	return c.DeleteOneID(prt.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PasswordResetTokenClient) DeleteOneID(id int) *PasswordResetTokenDeleteOne {
+	builder := c.Delete().Where(passwordresettoken.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PasswordResetTokenDeleteOne{builder}
+}
+
+// Query returns a query builder for PasswordResetToken.
+func (c *PasswordResetTokenClient) Query() *PasswordResetTokenQuery {
+	return &PasswordResetTokenQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePasswordResetToken},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PasswordResetToken entity by its id.
+func (c *PasswordResetTokenClient) Get(ctx context.Context, id int) (*PasswordResetToken, error) {
+	return c.Query().Where(passwordresettoken.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PasswordResetTokenClient) GetX(ctx context.Context, id int) *PasswordResetToken {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a PasswordResetToken.
+func (c *PasswordResetTokenClient) QueryUser(prt *PasswordResetToken) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := prt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(passwordresettoken.Table, passwordresettoken.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, passwordresettoken.UserTable, passwordresettoken.UserPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(prt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PasswordResetTokenClient) Hooks() []Hook {
+	return c.hooks.PasswordResetToken
+}
+
+// Interceptors returns the client interceptors.
+func (c *PasswordResetTokenClient) Interceptors() []Interceptor {
+	return c.inters.PasswordResetToken
+}
+
+func (c *PasswordResetTokenClient) mutate(ctx context.Context, m *PasswordResetTokenMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PasswordResetTokenCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PasswordResetTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PasswordResetTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PasswordResetTokenDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PasswordResetToken mutation op: %q", m.Op())
+	}
+}
+
 // PermissionsClient is a client for the Permissions schema.
 type PermissionsClient struct {
 	config
@@ -1114,6 +1273,22 @@ func (c *UserClient) QueryPermissions(u *User) *PermissionsQuery {
 	return query
 }
 
+// QueryPasswordResetTokens queries the password_reset_tokens edge of a User.
+func (c *UserClient) QueryPasswordResetTokens(u *User) *PasswordResetTokenQuery {
+	query := (&PasswordResetTokenClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(passwordresettoken.Table, passwordresettoken.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.PasswordResetTokensTable, user.PasswordResetTokensPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -1142,9 +1317,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		ClinicCreds, Clinics, Doctors, Permissions, RefreshToken, User []ent.Hook
+		ClinicCreds, Clinics, Doctors, PasswordResetToken, Permissions, RefreshToken,
+		User []ent.Hook
 	}
 	inters struct {
-		ClinicCreds, Clinics, Doctors, Permissions, RefreshToken, User []ent.Interceptor
+		ClinicCreds, Clinics, Doctors, PasswordResetToken, Permissions, RefreshToken,
+		User []ent.Interceptor
 	}
 )

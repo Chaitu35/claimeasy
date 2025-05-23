@@ -8,6 +8,7 @@ import (
 	"github.com/Chaitu35/claimeasy/backend/ent/cliniccreds"
 	"github.com/Chaitu35/claimeasy/backend/ent/clinics"
 	"github.com/Chaitu35/claimeasy/backend/ent/doctors"
+	"github.com/Chaitu35/claimeasy/backend/ent/passwordresettoken"
 	"github.com/Chaitu35/claimeasy/backend/ent/permissions"
 	"github.com/Chaitu35/claimeasy/backend/ent/refreshtoken"
 	"github.com/Chaitu35/claimeasy/backend/ent/schema"
@@ -61,6 +62,30 @@ func init() {
 	doctorsDescLicense := doctorsFields[2].Descriptor()
 	// doctors.LicenseValidator is a validator for the "license" field. It is called by the builders before save.
 	doctors.LicenseValidator = doctorsDescLicense.Validators[0].(func(string) error)
+	passwordresettokenFields := schema.PasswordResetToken{}.Fields()
+	_ = passwordresettokenFields
+	// passwordresettokenDescToken is the schema descriptor for token field.
+	passwordresettokenDescToken := passwordresettokenFields[0].Descriptor()
+	// passwordresettoken.TokenValidator is a validator for the "token" field. It is called by the builders before save.
+	passwordresettoken.TokenValidator = func() func(string) error {
+		validators := passwordresettokenDescToken.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(token string) error {
+			for _, fn := range fns {
+				if err := fn(token); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// passwordresettokenDescCreatedAt is the schema descriptor for created_at field.
+	passwordresettokenDescCreatedAt := passwordresettokenFields[2].Descriptor()
+	// passwordresettoken.DefaultCreatedAt holds the default value on creation for the created_at field.
+	passwordresettoken.DefaultCreatedAt = passwordresettokenDescCreatedAt.Default.(func() time.Time)
 	permissionsFields := schema.Permissions{}.Fields()
 	_ = permissionsFields
 	// permissionsDescCanView is the schema descriptor for can_view field.
@@ -71,10 +96,10 @@ func init() {
 	permissionsDescCanCreate := permissionsFields[2].Descriptor()
 	// permissions.DefaultCanCreate holds the default value on creation for the can_create field.
 	permissions.DefaultCanCreate = permissionsDescCanCreate.Default.(bool)
-	// permissionsDescCanUpdate is the schema descriptor for can_update field.
-	permissionsDescCanUpdate := permissionsFields[3].Descriptor()
-	// permissions.DefaultCanUpdate holds the default value on creation for the can_update field.
-	permissions.DefaultCanUpdate = permissionsDescCanUpdate.Default.(bool)
+	// permissionsDescCanEdit is the schema descriptor for can_edit field.
+	permissionsDescCanEdit := permissionsFields[3].Descriptor()
+	// permissions.DefaultCanEdit holds the default value on creation for the can_edit field.
+	permissions.DefaultCanEdit = permissionsDescCanEdit.Default.(bool)
 	// permissionsDescCanDelete is the schema descriptor for can_delete field.
 	permissionsDescCanDelete := permissionsFields[4].Descriptor()
 	// permissions.DefaultCanDelete holds the default value on creation for the can_delete field.
@@ -83,12 +108,8 @@ func init() {
 	permissionsDescCanExport := permissionsFields[5].Descriptor()
 	// permissions.DefaultCanExport holds the default value on creation for the can_export field.
 	permissions.DefaultCanExport = permissionsDescCanExport.Default.(bool)
-	// permissionsDescCanImport is the schema descriptor for can_import field.
-	permissionsDescCanImport := permissionsFields[6].Descriptor()
-	// permissions.DefaultCanImport holds the default value on creation for the can_import field.
-	permissions.DefaultCanImport = permissionsDescCanImport.Default.(bool)
 	// permissionsDescCanPrint is the schema descriptor for can_print field.
-	permissionsDescCanPrint := permissionsFields[7].Descriptor()
+	permissionsDescCanPrint := permissionsFields[6].Descriptor()
 	// permissions.DefaultCanPrint holds the default value on creation for the can_print field.
 	permissions.DefaultCanPrint = permissionsDescCanPrint.Default.(bool)
 	refreshtokenFields := schema.RefreshToken{}.Fields()

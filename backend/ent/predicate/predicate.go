@@ -15,6 +15,9 @@ type Clinics func(*sql.Selector)
 // Doctors is the predicate function for doctors builders.
 type Doctors func(*sql.Selector)
 
+// PasswordResetToken is the predicate function for passwordresettoken builders.
+type PasswordResetToken func(*sql.Selector)
+
 // Permissions is the predicate function for permissions builders.
 type Permissions func(*sql.Selector)
 

@@ -44,5 +44,6 @@ func (User) Fields() []ent.Field{
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 	edge.To("permissions", Permissions.Type),
+	edge.To("password_reset_tokens", PasswordResetToken.Type),
 }
 }

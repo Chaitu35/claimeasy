@@ -15,6 +15,7 @@ import (
 	"github.com/Chaitu35/claimeasy/backend/ent/cliniccreds"
 	"github.com/Chaitu35/claimeasy/backend/ent/clinics"
 	"github.com/Chaitu35/claimeasy/backend/ent/doctors"
+	"github.com/Chaitu35/claimeasy/backend/ent/passwordresettoken"
 	"github.com/Chaitu35/claimeasy/backend/ent/permissions"
 	"github.com/Chaitu35/claimeasy/backend/ent/refreshtoken"
 	"github.com/Chaitu35/claimeasy/backend/ent/user"
@@ -78,12 +79,13 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			cliniccreds.Table:  cliniccreds.ValidColumn,
-			clinics.Table:      clinics.ValidColumn,
-			doctors.Table:      doctors.ValidColumn,
-			permissions.Table:  permissions.ValidColumn,
-			refreshtoken.Table: refreshtoken.ValidColumn,
-			user.Table:         user.ValidColumn,
+			cliniccreds.Table:        cliniccreds.ValidColumn,
+			clinics.Table:            clinics.ValidColumn,
+			doctors.Table:            doctors.ValidColumn,
+			passwordresettoken.Table: passwordresettoken.ValidColumn,
+			permissions.Table:        permissions.ValidColumn,
+			refreshtoken.Table:       refreshtoken.ValidColumn,
+			user.Table:               user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

@@ -68,9 +68,9 @@ func CanCreate(v bool) predicate.Permissions {
 	return predicate.Permissions(sql.FieldEQ(FieldCanCreate, v))
 }
 
-// CanUpdate applies equality check predicate on the "can_update" field. It's identical to CanUpdateEQ.
-func CanUpdate(v bool) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEQ(FieldCanUpdate, v))
+// CanEdit applies equality check predicate on the "can_edit" field. It's identical to CanEditEQ.
+func CanEdit(v bool) predicate.Permissions {
+	return predicate.Permissions(sql.FieldEQ(FieldCanEdit, v))
 }
 
 // CanDelete applies equality check predicate on the "can_delete" field. It's identical to CanDeleteEQ.
@@ -81,11 +81,6 @@ func CanDelete(v bool) predicate.Permissions {
 // CanExport applies equality check predicate on the "can_export" field. It's identical to CanExportEQ.
 func CanExport(v bool) predicate.Permissions {
 	return predicate.Permissions(sql.FieldEQ(FieldCanExport, v))
-}
-
-// CanImport applies equality check predicate on the "can_import" field. It's identical to CanImportEQ.
-func CanImport(v bool) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEQ(FieldCanImport, v))
 }
 
 // CanPrint applies equality check predicate on the "can_print" field. It's identical to CanPrintEQ.
@@ -178,14 +173,14 @@ func CanCreateNEQ(v bool) predicate.Permissions {
 	return predicate.Permissions(sql.FieldNEQ(FieldCanCreate, v))
 }
 
-// CanUpdateEQ applies the EQ predicate on the "can_update" field.
-func CanUpdateEQ(v bool) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEQ(FieldCanUpdate, v))
+// CanEditEQ applies the EQ predicate on the "can_edit" field.
+func CanEditEQ(v bool) predicate.Permissions {
+	return predicate.Permissions(sql.FieldEQ(FieldCanEdit, v))
 }
 
-// CanUpdateNEQ applies the NEQ predicate on the "can_update" field.
-func CanUpdateNEQ(v bool) predicate.Permissions {
-	return predicate.Permissions(sql.FieldNEQ(FieldCanUpdate, v))
+// CanEditNEQ applies the NEQ predicate on the "can_edit" field.
+func CanEditNEQ(v bool) predicate.Permissions {
+	return predicate.Permissions(sql.FieldNEQ(FieldCanEdit, v))
 }
 
 // CanDeleteEQ applies the EQ predicate on the "can_delete" field.
@@ -206,16 +201,6 @@ func CanExportEQ(v bool) predicate.Permissions {
 // CanExportNEQ applies the NEQ predicate on the "can_export" field.
 func CanExportNEQ(v bool) predicate.Permissions {
 	return predicate.Permissions(sql.FieldNEQ(FieldCanExport, v))
-}
-
-// CanImportEQ applies the EQ predicate on the "can_import" field.
-func CanImportEQ(v bool) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEQ(FieldCanImport, v))
-}
-
-// CanImportNEQ applies the NEQ predicate on the "can_import" field.
-func CanImportNEQ(v bool) predicate.Permissions {
-	return predicate.Permissions(sql.FieldNEQ(FieldCanImport, v))
 }
 
 // CanPrintEQ applies the EQ predicate on the "can_print" field.

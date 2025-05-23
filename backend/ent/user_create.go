@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Chaitu35/claimeasy/backend/ent/passwordresettoken"
 	"github.com/Chaitu35/claimeasy/backend/ent/permissions"
 	"github.com/Chaitu35/claimeasy/backend/ent/user"
 	"github.com/Chaitu35/claimeasy/backend/pkg/core/role"
@@ -177,6 +178,21 @@ func (uc *UserCreate) AddPermissions(p ...*Permissions) *UserCreate {
 		ids[i] = p[i].ID
 	}
 	return uc.AddPermissionIDs(ids...)
+}
+
+// AddPasswordResetTokenIDs adds the "password_reset_tokens" edge to the PasswordResetToken entity by IDs.
+func (uc *UserCreate) AddPasswordResetTokenIDs(ids ...int) *UserCreate {
+	uc.mutation.AddPasswordResetTokenIDs(ids...)
+	return uc
+}
+
+// AddPasswordResetTokens adds the "password_reset_tokens" edges to the PasswordResetToken entity.
+func (uc *UserCreate) AddPasswordResetTokens(p ...*PasswordResetToken) *UserCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uc.AddPasswordResetTokenIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -385,6 +401,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.PasswordResetTokensIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.PasswordResetTokensTable,
+			Columns: user.PasswordResetTokensPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passwordresettoken.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
