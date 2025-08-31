@@ -1,0 +1,6 @@
+Folder PATH listing for volume Data
+Volume serial number is 98D7-5E40
+D:\CLAIMEASY_NEW\CLAIMEASY_NEW
+Invalid path - \CLAIMEASY_NEW\CLAIMEASY_NEW
+No subfolders exist 
+

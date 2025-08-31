@@ -3,30 +3,71 @@ package audit
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
-
-	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
-func Log(ctx context.Context, db *gorm.DB, entity string, entityId uint, action string, changes map[string][2]interface{})error{
+type Logger struct {
+	storage Storage
+}
 
- useid:= GetUserid(ctx)
+func NewLogger(storage Storage) *Logger {
+	return &Logger{storage: storage}
+}
 
-	changesJSON, err := json.Marshal(changes)
+// LogSnapshot → CREATE / DELETE / RESTORE
+func (l *Logger) LogSnapshot(ctx context.Context, action AuditAction, entity string, entityID uint, data interface{}, reason string) error {
+	actorID, actorName := GetUser(ctx)
+	raw, err := json.Marshal(data)
 	if err != nil {
-		return err
+		return fmt.Errorf("audit marshal error: %w", err)
 	}
-
-	logEntry:= Auditlog{
-		Entity:    entity,	
-		EntityID:  entityId,
-		Action:    action,
-		ChangedBy: useid,
-		Changes:   datatypes.JSON(changesJSON),
-		CreatedAt: time.Now(),
-
-
+	entry := AuditEntry{
+		Timestamp: time.Now(),
+		ActorID:   actorID,
+		ActorName: actorName,
+		Action:    string(action),
+		Entity:    entity,
+		EntityID:  entityID,
+		Reason:    reason,
+		FullData:  raw,
 	}
-	return  db.Create(&logEntry).Error
+	return l.storage.Save(ctx, entry)
+}
+
+// LogDiff → UPDATE with field-level diffs
+func (l *Logger) LogDiff(ctx context.Context, action AuditAction, entity string, entityID uint, before, after map[string]interface{}, reason string) error {
+	actorID, actorName := GetUser(ctx)
+	diffs := CompareSnapshots(before, after)
+	raw, err := json.Marshal(after)
+	if err != nil {
+		return fmt.Errorf("audit marshal error: %w", err)
+	}
+	entry := AuditEntry{
+		Timestamp:  time.Now(),
+		ActorID:    actorID,
+		ActorName:  actorName,
+		Action:     string(action),
+		Entity:     entity,
+		EntityID:   entityID,
+		Reason:     reason,
+		FullData:   raw,
+		FieldDiffs: diffs,
+	}
+	return l.storage.Save(ctx, entry)
+}
+
+// LogEvent → VIEW / SEARCH / LOGIN / LOGOUT / EXPORT
+func (l *Logger) LogEvent(ctx context.Context, action AuditAction, entity string, entityID uint, reason string) error {
+	actorID, actorName := GetUser(ctx)
+	entry := AuditEntry{
+		Timestamp: time.Now(),
+		ActorID:   actorID,
+		ActorName: actorName,
+		Action:    string(action),
+		Entity:    entity,
+		EntityID:  entityID,
+		Reason:    reason,
+	}
+	return l.storage.Save(ctx, entry)
 }
