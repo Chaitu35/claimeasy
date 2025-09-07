@@ -54,4 +54,11 @@ const (
 	// future: suspend, lock, archive, etc.
 )
 
+type PasswordResetToken struct {
+	ID        uint      `gorm:"primaryKey"`
+	UserID    uint      `gorm:"index;not null"` // link to user
+	TokenHash string    `gorm:"size:256;not null"`
+	ExpiresAt time.Time `gorm:"not null"`
+	CreatedAt time.Time
+}
 

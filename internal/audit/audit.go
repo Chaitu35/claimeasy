@@ -44,6 +44,9 @@ const (
 	ActionSuspend  AuditAction = "SUSPEND"
 	ActionActivate AuditAction = "ACTIVATE"
 	ActionArchive  AuditAction = "ARCHIVE"
+	ActionChangePassword AuditAction = "CHANGE_PASSWORD"
+	ActionResetPassword  AuditAction = "RESET_PASSWORD"
+	ActionFailedLogin    AuditAction = "FAILED_LOGIN"
 )
 
 // ---------------- AuditEntry / FieldChange ----------------
