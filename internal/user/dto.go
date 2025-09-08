@@ -44,8 +44,9 @@ type SearchUserRequest struct {
 	RoleID   *uint  `json:"role_id,omitempty"`
 	IsActive *bool  `json:"is_active,omitempty"`
 	IncludeDeleted bool   `json:"include_deleted,omitempty"` // if true, include soft-deleted users
-	Page     int    `json:"page,omitempty" binding:"gte=1"`
-	PageSize int    `json:"page_size,omitempty" binding:"gte=1,lte=100"`
+	Page     int `form:"page,default=1" json:"page,omitempty" binding:"gte=1"`
+    PageSize int `form:"page_size,default=20" json:"page_size,omitempty" binding:"gte=1,lte=100"`
+
 }
 
 // ------------------- Responses -------------------

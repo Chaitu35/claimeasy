@@ -13,4 +13,8 @@ func RegisterAuthRoutes(rg *gin.RouterGroup, h *Handler) {
 	authGroup.POST("/verify-totp", h.VerifyTOTP)
 	authGroup.POST("/generate-recovery-codes", h.GenerateRecoveryCodes)
 	authGroup.POST("/use-recovery-code", h.UseRecoveryCode)
+
+	// NEW routes
+	authGroup.POST("/refresh-token", h.RefreshToken)
+	authGroup.POST("/logout", h.Logout)
 }

@@ -13,8 +13,8 @@ import (
 	"github.com/chaitu35/claimeasy/internal/audit"
 	"github.com/chaitu35/claimeasy/internal/permission"
 	"github.com/chaitu35/claimeasy/internal/user"
+	utils "github.com/chaitu35/claimeasy/pkg/notifications"
 	security "github.com/chaitu35/claimeasy/pkg/security"
-    utils "github.com/chaitu35/claimeasy/pkg/notifications"
 	"gorm.io/gorm"
 )
 
@@ -42,6 +42,7 @@ type Service interface {
     ResetPassword(ctx context.Context, db *gorm.DB, token string, newPassword string) error
 
     Logout(ctx context.Context, db *gorm.DB, userID uint) error
+    RefreshToken(ctx context.Context, db *gorm.DB, refreshToken string) (string, string, error)
 }
 
 // -------------------------
@@ -50,14 +51,16 @@ type Service interface {
 type service struct {
     jwt               security.JWTService
     permissionService permission.Service
+    userService     user.Service
     auditLogger       *audit.Logger
      mailer            utils.Mailer
 }
 
-func NewService(jwt security.JWTService, permService permission.Service, auditor *audit.Logger,mailer utils.Mailer) Service {
+func NewService(jwt security.JWTService, permService permission.Service,userService user.Service, auditor *audit.Logger,mailer utils.Mailer) Service {
     return &service{
         jwt:               jwt,
         permissionService: permService,
+        userService:    userService,
         auditLogger:       auditor,
         mailer:            mailer, // or use dependency injection
     }
@@ -114,7 +117,7 @@ func (s *service) Login(ctx context.Context, db *gorm.DB, req LoginRequest) (*Lo
     }
 
     // Direct login if no MFA
-    return s.generateTokenResponse(u,db)
+    return s.generateTokenResponse(ctx,u,db)
 }
 
 // -------------------------
@@ -209,7 +212,7 @@ func (s *service) VerifyMFAChallenge(ctx context.Context, db *gorm.DB, userID ui
         return nil, errors.New("user not found")
     }
 
-    return s.generateTokenResponse(u,db)
+    return s.generateTokenResponse(ctx,u,db)
 }
 
 // -------------------------
@@ -377,13 +380,13 @@ func (s *service) UseRecoveryCode(ctx context.Context, db *gorm.DB, userID uint,
         return nil, errors.New("user not found")
     }
 
-    return s.generateTokenResponse(u,db)
+    return s.generateTokenResponse(ctx,u,db)
 }
 
 // -------------------------
 // Helper methods
 // -------------------------
-func (s *service) generateTokenResponse(u user.User,db *gorm.DB) (*LoginResponse, error) {
+func (s *service) generateTokenResponse(ctx context.Context,u user.User,db *gorm.DB) (*LoginResponse, error) {
     // Fetch user's permissions
     userPerms, err := s.permissionService.ListUserPermissions(context.Background(), db, u.ID)
     if err != nil {
@@ -393,9 +396,15 @@ func (s *service) generateTokenResponse(u user.User,db *gorm.DB) (*LoginResponse
     // Extract permission names as []string
    
    var perms []string
-   for _, p := range userPerms {
-    perms = append(perms, fmt.Sprintf("%d", p.PermissionID))
-                  }
+for _, p := range userPerms {
+    permDetail, err := s.permissionService.GetPermissionByID(ctx, db, p.PermissionID)
+    if err != nil {
+        continue // or handle error
+    }
+    perms = append(perms, permDetail.Key)
+}
+
+
 
     accessToken, err := s.jwt.GenerateAccessToken(u.ID, u.Email, perms)
     if err != nil {
@@ -512,3 +521,46 @@ func (s *service) ResetPassword(ctx context.Context, db *gorm.DB, token, newPass
 	return nil
 }
 
+func (s *service) RefreshToken(ctx context.Context, db *gorm.DB, refreshToken string) (string, string, error) {
+	// instantiate JWTService internally
+	jwtSvc := security.NewJWTService(
+		"your-secret-key",    // secret key
+		"ClaimeEasy",         // issuer
+		time.Minute*15,       // access token expiry
+		time.Hour*24*7,       // refresh token expiry
+	)
+
+	// validate the refresh token
+	claims, err := jwtSvc.ValidateRefreshToken(refreshToken)
+	if err != nil {
+		return "", "", errors.New("invalid refresh token")
+	}
+
+	// fetch user permissions from UserService
+	userResp, err := s.userService.GetUserByID(ctx, claims.UserID, false)
+	if err != nil {
+		return "", "", errors.New("user not found")
+	}
+
+	// fetch user's permissions keys
+	perms, err := s.permissionService.ListUserPermissions(ctx, db, userResp.ID)
+	if err != nil {
+		return "", "", errors.New("failed to fetch permissions")
+	}
+    
+
+	var permissions []string
+for _, p := range perms {
+    permDetail, _ := s.permissionService.GetPermissionByID(ctx, db, p.PermissionID)
+    permissions = append(permissions, permDetail.Key)
+}
+	
+	// generate new access token
+	accessToken, err := jwtSvc.GenerateAccessToken(userResp.ID, userResp.Email, permissions)
+	if err != nil {
+		return "", "", errors.New("failed to generate access token")
+	}
+
+	// optionally, reuse the same refresh token
+	return accessToken, refreshToken, nil
+}

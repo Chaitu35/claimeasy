@@ -7,19 +7,20 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+
 	//"strconv"
 	"syscall"
 	"time"
 
-	"github.com/chaitu35/claimeasy/internal/auth"
-	"github.com/chaitu35/claimeasy/internal/audit"
 	config "github.com/chaitu35/claimeasy/configs"
+	"github.com/chaitu35/claimeasy/internal/audit"
+	"github.com/chaitu35/claimeasy/internal/auth"
 	"github.com/chaitu35/claimeasy/internal/database"
 	"github.com/chaitu35/claimeasy/internal/permission"
 	"github.com/chaitu35/claimeasy/internal/role"
 	"github.com/chaitu35/claimeasy/internal/user"
+	notification "github.com/chaitu35/claimeasy/pkg/notifications"
 	security "github.com/chaitu35/claimeasy/pkg/security"
-	 notification "github.com/chaitu35/claimeasy/pkg/notifications"
 	"github.com/gin-gonic/gin"
 )
 
@@ -68,7 +69,7 @@ func main() {
 	roleService := role.NewService(roleRepo, logger)
 	userRepo := user.NewUserRepository()
 	userService := user.NewService(userRepo, db, logger, permRepo)
-	authService := auth.NewService(jwtService, permService, logger,mailer)
+	authService := auth.NewService(jwtService, permService,*userService, logger,mailer)
 
 			// ----------------------
 	// Handlers
@@ -76,7 +77,7 @@ func main() {
 	permHandler := permission.NewHandler(permService, db)
 	roleHandler := role.NewHandler(roleService, db)
 	userHandler := user.NewUserHandler(userService, db)
-	authHandler := auth.NewHandler(authService, db)
+	authHandler := auth.NewHandler(authService, userService,db)
 
 	// ----------------------
 	// Router

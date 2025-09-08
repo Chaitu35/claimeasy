@@ -2,18 +2,22 @@ package auth
 
 import (
 	"net/http"
+	//"time"
 
+	"github.com/chaitu35/claimeasy/internal/user"
+	//security "github.com/chaitu35/claimeasy/pkg/security"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type Handler struct {
 	service Service
+ userService *user.Service
 	db      *gorm.DB
 }
 
-func NewHandler(s Service, db *gorm.DB) *Handler {
-	return &Handler{service: s, db: db}
+func NewHandler(s Service, u *user.Service,db *gorm.DB) *Handler {
+	return &Handler{service: s,userService: u, db: db}
 }
 
 // -------------------------
@@ -37,15 +41,24 @@ func (h *Handler) Login(c *gin.Context) {
 }
 
 func (h *Handler) RefreshToken(c *gin.Context) {
-	var req RefreshTokenRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    var req RefreshTokenRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	// TODO: Add Refresh Token validation using service if you want
-	c.JSON(http.StatusOK, gin.H{"message": "refresh not implemented"})
+    accessToken, newRefreshToken, err := h.service.RefreshToken(c.Request.Context(), h.db, req.RefreshToken)
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "access_token":  accessToken,
+        "refresh_token": newRefreshToken,
+    })
 }
+
 
 func (h *Handler) VerifyMFA(c *gin.Context) {
 	var req VerifyMFARequest
@@ -157,4 +170,9 @@ func (h *Handler) ResetPassword(c *gin.Context) {
 		return
 	}	
 	c.JSON(http.StatusOK, gin.H{"message": "Password has been reset successfully"})
+}
+
+func (h *Handler) Logout(c *gin.Context) {
+	// If using a token blacklist, you would add the refresh token here
+	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }
