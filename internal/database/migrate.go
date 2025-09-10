@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/chaitu35/claimeasy/internal/audit"
+	"github.com/chaitu35/claimeasy/internal/auth"
+	"github.com/chaitu35/claimeasy/internal/clinics"
 	"github.com/chaitu35/claimeasy/internal/permission"
 	"github.com/chaitu35/claimeasy/internal/role"
 	"github.com/chaitu35/claimeasy/internal/user"
@@ -20,6 +22,15 @@ func Migrate(db *gorm.DB) {
         &permission.RolePermission{},
         &permission.UserPermission{},
         &audit.AuditEntry{},
+        // Auth
+		&auth.LoginAttempt{},
+		&auth.MFAChallenge{},
+		&auth.MFAAttempt{},
+		&auth.RecoveryCode{},
+		&auth.PasswordReset{},
+		// Clinics
+		&clinics.Clinic{},
+		&clinics.UserClinic{},
     }
 
     if err := db.AutoMigrate(models...); err != nil {

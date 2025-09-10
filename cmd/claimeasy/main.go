@@ -15,6 +15,7 @@ import (
 	config "github.com/chaitu35/claimeasy/configs"
 	"github.com/chaitu35/claimeasy/internal/audit"
 	"github.com/chaitu35/claimeasy/internal/auth"
+	"github.com/chaitu35/claimeasy/internal/clinics"
 	"github.com/chaitu35/claimeasy/internal/database"
 	"github.com/chaitu35/claimeasy/internal/permission"
 	"github.com/chaitu35/claimeasy/internal/role"
@@ -63,17 +64,20 @@ func main() {
 	// ----------------------
 	// Services
 	// ----------------------
+	clinicRepo := clinics.NewRepository(db)
+    clinicService := clinics.NewService(clinicRepo, logger,db)
 	permRepo := permission.NewRepository()
 	permService := permission.NewService(permRepo, logger)
 	roleRepo := role.NewRepository()
 	roleService := role.NewService(roleRepo, logger)
 	userRepo := user.NewUserRepository()
-	userService := user.NewService(userRepo, db, logger, permRepo)
+	userService := user.NewService(userRepo, db, logger, permRepo,clinicService)
 	authService := auth.NewService(jwtService, permService,*userService, logger,mailer)
 
 			// ----------------------
 	// Handlers
 	// ----------------------
+	clinicHandler:= clinics.NewHandler(clinicService)
 	permHandler := permission.NewHandler(permService, db)
 	roleHandler := role.NewHandler(roleService, db)
 	userHandler := user.NewUserHandler(userService, db)
@@ -88,6 +92,7 @@ func main() {
 	permission.RegisterPermissionRoutes(api, permHandler)
 	role.RegisterRoleRoutes(api, roleHandler)
 	auth.RegisterAuthRoutes(api, authHandler)
+	clinics.RegisterClinicRoutes(api, clinicHandler)
 
 	// Audit routes
 	auditHandler := audit.NewHandler(logger)
