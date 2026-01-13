@@ -2,8 +2,11 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
+	"github.com/chaitu35/claimeasy/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -15,7 +18,13 @@ type Repository interface {
 
 	// Unified lifecycle operations
 	UpdateUserStatus(ctx context.Context, db *gorm.DB, userID uint, action UserStatusAction) error
+
+	// Password reset
+	SavePasswordResetToken(ctx context.Context, tx *gorm.DB, userID uint, tokenHash string, expiresAt time.Time) error
+    VerifyPasswordResetToken(ctx context.Context, tx *gorm.DB, token string) (uint, error)
+    DeletePasswordResetToken(ctx context.Context, tx *gorm.DB, token string) error
 }
+
 
 type userRepo struct{}
 
@@ -130,4 +139,47 @@ func (r *userRepo) UpdateUserStatus(ctx context.Context, db *gorm.DB, userID uin
 	default:
 		return fmt.Errorf("unsupported action: %s", action)
 	}
+}
+
+
+// ---------------- Password Reset ----------------
+
+var ErrInvalidOrExpiredToken = errors.New("invalid or expired reset token")
+
+// Save
+func (r *userRepo) SavePasswordResetToken(ctx context.Context, tx *gorm.DB, userID uint, tokenHash string, expiresAt time.Time) error {
+    resetToken := PasswordResetToken{
+        UserID:    userID,
+        TokenHash: tokenHash,
+        ExpiresAt: expiresAt,
+    }
+    return tx.WithContext(ctx).Create(&resetToken).Error
+}
+
+// Verify
+func (r *userRepo) VerifyPasswordResetToken(ctx context.Context, tx *gorm.DB, token string) (uint, error) {
+    var resetToken PasswordResetToken
+    err := tx.WithContext(ctx).
+        Where("expires_at > ?", time.Now()).
+        First(&resetToken).Error
+    if err != nil {
+        return 0, ErrInvalidOrExpiredToken
+    }
+
+    if !utils.CheckPasswordHash(token, resetToken.TokenHash) {
+        return 0, ErrInvalidOrExpiredToken
+    }
+
+    return resetToken.UserID, nil
+}
+
+// Delete
+func (r *userRepo) DeletePasswordResetToken(ctx context.Context, tx *gorm.DB, token string) error {
+    var resetToken PasswordResetToken
+    err := tx.WithContext(ctx).First(&resetToken).Error
+    if err != nil {
+        return ErrInvalidOrExpiredToken
+    }
+
+    return tx.WithContext(ctx).Delete(&resetToken).Error
 }

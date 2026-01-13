@@ -7,15 +7,21 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+
+	//"strconv"
 	"syscall"
 	"time"
 
+	config "github.com/chaitu35/claimeasy/configs"
 	"github.com/chaitu35/claimeasy/internal/audit"
-	"github.com/chaitu35/claimeasy/internal/config"
+	"github.com/chaitu35/claimeasy/internal/auth"
+	"github.com/chaitu35/claimeasy/internal/clinics"
 	"github.com/chaitu35/claimeasy/internal/database"
 	"github.com/chaitu35/claimeasy/internal/permission"
 	"github.com/chaitu35/claimeasy/internal/role"
 	"github.com/chaitu35/claimeasy/internal/user"
+	notification "github.com/chaitu35/claimeasy/pkg/notifications"
+	security "github.com/chaitu35/claimeasy/pkg/security"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,60 +31,81 @@ func main() {
 	seed := flag.Bool("seed", false, "Run database seeders")
 	flag.Parse()
 
-
-
-	// 2️⃣ Connect to DB
+	// ----------------------
+	// Connect to DB
+	// ----------------------
 	database.Connection()
 	db := database.DB
-
-	// 2.1️⃣ Run migrations
 	database.Migrate(db)
 
-		if *seed {
+	if *seed {
 		database.Seed(db)
 		log.Println("🌱 Database seeding completed")
 	}
 
-	// 3️⃣ Init audit storage & logger
+	// ----------------------
+	// Init audit
+	// ----------------------
 	auditStorage := audit.NewDBStorage(db)
 	logger := audit.NewLogger(auditStorage)
 
-	
+	// ----------------------
+	// JWT Service
+	// ----------------------
+	accessExpiry := time.Minute * time.Duration(cfg.AccessTokenExpiryMin)
+	refreshExpiry := time.Hour * 24 * time.Duration(cfg.RefreshTokenExpiryDays)
+	jwtService := security.NewJWTService(cfg.JWTSecret, "ClaimEasy", accessExpiry, refreshExpiry)
 
-	// 5️⃣ Build Permission module, Role module, User module
+	// ----------------------
+	// Mailer
+	// ----------------------
+	mailer := notification.ProvideMailer(cfg)
+
+	// ----------------------
+	// Services
+	// ----------------------
+	clinicRepo := clinics.NewRepository(db)
+    clinicService := clinics.NewService(clinicRepo, logger,db)
 	permRepo := permission.NewRepository()
 	permService := permission.NewService(permRepo, logger)
-	permHandler := permission.NewHandler(permService, db)
-
 	roleRepo := role.NewRepository()
-	roleService := role.NewService(roleRepo,  logger)
-	roleHandler := role.NewHandler(roleService, db)
-
+	roleService := role.NewService(roleRepo, logger)
 	userRepo := user.NewUserRepository()
-	userService := user.NewService(userRepo, db, logger,permRepo)
+	userService := user.NewService(userRepo, db, logger, permRepo,clinicService)
+	authService := auth.NewService(jwtService, permService,*userService, logger,mailer)
+
+			// ----------------------
+	// Handlers
+	// ----------------------
+	clinicHandler:= clinics.NewHandler(clinicService)
+	permHandler := permission.NewHandler(permService, db)
+	roleHandler := role.NewHandler(roleService, db)
 	userHandler := user.NewUserHandler(userService, db)
-	
+	authHandler := auth.NewHandler(authService, userService,db)
 
-	// 6️⃣ Setup router
+	// ----------------------
+	// Router
+	// ----------------------
 	r := gin.Default()
-
-	// 7️⃣ Register routes
 	api := r.Group("/api/v1")
 	user.RegisterUserRoutes(api, userHandler)
 	permission.RegisterPermissionRoutes(api, permHandler)
 	role.RegisterRoleRoutes(api, roleHandler)
+	auth.RegisterAuthRoutes(api, authHandler)
+	clinics.RegisterClinicRoutes(api, clinicHandler)
 
-	// 8️⃣ Register Audit routes
+	// Audit routes
 	auditHandler := audit.NewHandler(logger)
 	audit.RegisterRoutes(api, auditHandler)
 
-	// 9️⃣ Start server with graceful shutdown
+	// ----------------------
+	// Start server
+	// ----------------------
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
 		Handler: r,
 	}
 
-	// Run server in a goroutine
 	go func() {
 		log.Printf("Server starting on port %s...", cfg.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -86,13 +113,14 @@ func main() {
 		}
 	}()
 
-	// Wait for Ctrl+C or termination signal
+	// ----------------------
+	// Graceful shutdown
+	// ----------------------
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Println("Shutting down server...")
 
-	// Context with timeout for cleanup
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

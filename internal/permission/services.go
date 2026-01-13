@@ -17,7 +17,7 @@ type Service interface {
 	UpdatePermission(ctx context.Context, db *gorm.DB,id uint, req UpdatePermissionRequest) (PermissionResponse, error)
 	GetPermissionByID(ctx context.Context, db *gorm.DB, id uint) (PermissionResponse, error)
 	ListPermissions(ctx context.Context, db *gorm.DB) ([]PermissionResponse, error)
-
+   // GetPermissionsByID(ctx context.Context, db *gorm.DB, ids []uint) ([]PermissionResponse, error)
 	// Role ↔ Permission
 	AssignPermissionToRole(ctx context.Context, db *gorm.DB, req AssignRolePermissionRequest) (RolePermissionResponse, error)
 	RevokePermissionFromRole(ctx context.Context, db *gorm.DB, roleID, permissionID uint, reason string) error

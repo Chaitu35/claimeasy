@@ -25,6 +25,8 @@ type Repository interface {
 	AssignPermissionToUser(ctx context.Context, db *gorm.DB, up *UserPermission) error
 	RevokePermissionFromUser(ctx context.Context, db *gorm.DB, userID, permissionID uint) error
 	ListUserPermissions(ctx context.Context, db *gorm.DB, userID uint) ([]UserPermission, error)
+
+	//GetPermissionsByUserID(ctx context.Context, db *gorm.DB, userID uint) ([]Permission, error)
 }
 
 type permissionRepo struct{}
@@ -96,6 +98,14 @@ func (r *permissionRepo) ListRolePermissions(ctx context.Context, db *gorm.DB, r
 		Preload("Permission").
 		Find(&list).Error
 	return list, err
+}
+
+func (r *permissionRepo) GetPermissionsByUserID(ctx context.Context, db *gorm.DB, userID uint) ([]Permission, error) {
+    var perms []Permission
+    err := db.WithContext(ctx).Model(&Permission{}).
+        Joins("JOIN user_permissions up ON up.permission_id = permissions.id").
+        Where("up.user_id = ?", userID).Find(&perms).Error
+    return perms, err
 }
 
 // ----------------------

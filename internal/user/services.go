@@ -15,14 +15,20 @@ type Service struct {
 	db     *gorm.DB
 	logger *audit.Logger
     permRepo permission.Repository
+    clinicSvc ClinicService 
 }
 
-func NewService(repo Repository, db *gorm.DB, logger *audit.Logger, permRepo permission.Repository) *Service {
+type ClinicService interface {
+    RevokeClinicsForUser(ctx context.Context, tx *gorm.DB, userID uint) error
+}
+
+func NewService(repo Repository, db *gorm.DB, logger *audit.Logger, permRepo permission.Repository, clinicSvr ClinicService) *Service {
 	return &Service{
 		repo:   repo,
 		db:     db,
 		logger: logger,
         permRepo: permRepo,
+        clinicSvc : clinicSvr,
 	}
 }
 // withTransaction is a helper to wrap operations in a DB transaction.
@@ -168,11 +174,22 @@ func (s *Service) UpdateUserStatus(ctx context.Context, userID uint, action User
             return err
         }
 
-        // Refresh user after update
-        user, _ = s.repo.GetUserByID(ctx, tx, userID, true)
+        // Revoke assigned clinics if user is deactivated or deleted
+        if action == UserActionDeactivate || action == UserActionDelete {
+            if err := s.clinicSvc.RevokeClinicsForUser(ctx, tx,userID); err != nil {
+                return err
+            }
+        }
+
+        // Refresh after update
+        user,err= s.repo.GetUserByID(ctx, tx, userID, true)
+        if err != nil {
+            return err
+        }
         return s.logger.LogDiff(ctx, "STATUS_CHANGE", "user", user.ID, before, MapUserToMap(user), fmt.Sprintf("User %s", action))
     })
 }
+
 
 // ---------------- Fetch / Search ----------------
 

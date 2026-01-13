@@ -1,0 +1,61 @@
+# Go build artifacts
+/bin/
+/build/
+/*.exe
+/*.exe~
+/*.dll
+/*.so
+/*.dylib
+
+# Test binaries
+*.test
+
+# Output directories
+/out/
+/dist/
+
+# Vendor folder
+/vendor/
+
+# IDE/editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.DS_Store
+*.log
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Environment files
+.env.*
+!.env.example  # if you want to keep a template
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage files
+*.coverprofile
+*.cov
+
+# Logs
+*.log
+logs/
+*.tmp
+
+# Node / web (if using frontend in /web)
+web/node_modules/
+web/dist/
+web/build/
+
+# Zap/GORM logs if generated
+zapgorm/*.log
+
+# Misc
+*.bak
+*.old
